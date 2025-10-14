@@ -8,7 +8,7 @@ from .views import HabitViewSet
 app_name = HtrackerConfig.name
 
 router = DefaultRouter()
-router.register(r'habits', HabitViewSet, basename='habit')
+router.register(r'htracker', HabitViewSet, basename='htracker')
 
 urlpatterns = [
     path('', include(router.urls)),

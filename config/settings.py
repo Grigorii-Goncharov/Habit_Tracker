@@ -177,28 +177,28 @@ if "test" in sys.argv:
 
 
 # Настройки Celery
-CELERY_BROKER_URL = "redis://localhost:6379/0"
-CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
+# CELERY_BROKER_URL = "redis://localhost:6379/0"
+# CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
 
 # Используем eventlet на Windows
-CELERY_WORKER_POOL = "eventlet"
-CELERY_WORKER_POOL_RESTARTS = True
+# CELERY_WORKER_POOL = "eventlet"
+# CELERY_WORKER_POOL_RESTARTS = True
 
 # Опционально: сериализация
-CELERY_ACCEPT_CONTENT = ["json"]
-CELERY_TASK_SERIALIZER = "json"
-CELERY_RESULT_SERIALIZER = "json"
-CELERY_TIMEZONE = "TIME_ZONE"
-
-CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+# CELERY_ACCEPT_CONTENT = ["json"]
+# CELERY_TASK_SERIALIZER = "json"
+# CELERY_RESULT_SERIALIZER = "json"
+# CELERY_TIMEZONE = "TIME_ZONE"
+#
+# CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
 # Настройки Celery Beat (планировщик)
-CELERY_BEAT_SCHEDULE = {
-    "deactivate-inactive-users-daily": {
-        "task": "educations.tasks.deactivate_inactive_users",
-        "schedule": crontab(hour=2, minute=0),  # каждый день в 02:00
-    },
-}
+# CELERY_BEAT_SCHEDULE = {
+#     "deactivate-inactive-users-daily": {
+#         "task": "educations.tasks.deactivate_inactive_users",
+#         "schedule": crontab(hour=2, minute=0),  # каждый день в 02:00
+#     },
+# }
 
 TELEGRAM_URL = "https://api.telegram.org/bot"
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
