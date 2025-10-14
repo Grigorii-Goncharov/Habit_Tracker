@@ -123,7 +123,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Europe/Moscow"
 
 USE_I18N = True
 
@@ -177,20 +177,20 @@ if "test" in sys.argv:
 
 
 # Настройки Celery
-# CELERY_BROKER_URL = "redis://localhost:6379/0"
-# CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
+CELERY_BROKER_URL = "redis://localhost:6379/0"
+CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
 
-# Используем eventlet на Windows
-# CELERY_WORKER_POOL = "eventlet"
-# CELERY_WORKER_POOL_RESTARTS = True
+#Используем eventlet на Windows
+CELERY_WORKER_POOL = "eventlet"
+CELERY_WORKER_POOL_RESTARTS = True
 
-# Опционально: сериализация
-# CELERY_ACCEPT_CONTENT = ["json"]
-# CELERY_TASK_SERIALIZER = "json"
-# CELERY_RESULT_SERIALIZER = "json"
-# CELERY_TIMEZONE = "TIME_ZONE"
-#
-# CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+#Опционально: сериализация
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = "Europe/Moscow"
+
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
 # Настройки Celery Beat (планировщик)
 # CELERY_BEAT_SCHEDULE = {

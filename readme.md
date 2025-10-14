@@ -59,6 +59,9 @@ J   WT-аутентификация: безопасный вход и управ
 1. **Запустите сервер разработки:**
    ```bash
    python manage.py runserver
+**Запустите celery для ОС WINDOWS:**
+   poetry run celery -A config worker -l INFO --pool=solo
+   poetry run celery -A config worker -l INFO
    
 2. **API доступно по адресу:**
     http://127.0.0.1:8000/api/redoc
