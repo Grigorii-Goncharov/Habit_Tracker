@@ -6,13 +6,26 @@ class HabitSerializer(serializers.ModelSerializer):
     """Сериализатор для модели привычки"""
     class Meta:
         model = Habit
-        fields = '__all__'
-        read_only_fields = ('owner',)
+        fields = ('owner',
+                  'place',
+                  'time',
+                  'action',
+                  'pleasant_habit',
+                  'related_habit',
+                  'periodicity',
+                  'reward',
+                  'duration',
+                  'is_public',
+                  'status',
+                  'created_at',
+                  'last_completed_at',)
+        read_only_fields = ('owner', 'last_completed_at', 'created_at')
 
     def validate(self, data):
-        # Валидация модели только при создании
         if not self.instance:
-            temp = Habit(**data)
+            owner = self.context['request'].user
+            temp = Habit(owner=owner, **data)
             temp.clean()
         return data
+
 
