@@ -4,10 +4,11 @@ from users.models import User
 
 
 class Habit(models.Model):
-
+    """Модель привычки"""
     STARTED = 'started'
     COMPLETED = 'completed'
     FAILED = 'failed'
+
 
     STATUS_CHOICES = [
         (STARTED, 'запущена'),
@@ -54,7 +55,14 @@ class Habit(models.Model):
 
     is_public = models.BooleanField(default=False, verbose_name="Публичная")
 
-    status = models.CharField(max_length=15, choices=STATUS_CHOICES, default=STARTED)
+    status  = models.CharField(max_length=15, choices=STATUS_CHOICES, default=STARTED)
+
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    last_completed_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Последнее выполнение"
+    )
 
     def clean(self):
         if self.duration > 120:
