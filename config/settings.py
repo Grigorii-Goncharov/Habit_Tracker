@@ -193,12 +193,12 @@ CELERY_TIMEZONE = "Europe/Moscow"
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
 # Настройки Celery Beat (планировщик)
-# CELERY_BEAT_SCHEDULE = {
-#     "deactivate-inactive-users-daily": {
-#         "task": "educations.tasks.deactivate_inactive_users",
-#         "schedule": crontab(hour=2, minute=0),  # каждый день в 02:00
-#     },
-# }
+CELERY_BEAT_SCHEDULE = {
+    'check-habits-daily': {
+        'task': 'tracker.tasks.check_all_habits',
+        'schedule': crontab(minute=0, hour='*/6'),
+    },
+}
 
 TELEGRAM_URL = "https://api.telegram.org/bot"
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
