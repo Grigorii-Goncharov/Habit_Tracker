@@ -1,12 +1,12 @@
+from django.utils import timezone
+
 from rest_framework import viewsets, filters
 from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
-
-from users.services import send_telegram_message
 from .models import Habit
 from .serializers import HabitSerializer
 from .permissions import IsOwnerOrReadOnlyForPublic
-from .tasks import send_telegram_reminder, check_status
+from .tasks import send_telegram_message_task
 
 
 class HabitPagination(PageNumberPagination):
@@ -59,43 +59,31 @@ class HabitViewSet(viewsets.ModelViewSet):
                 else:
                     message = f"Создана новая привычка: {habit.action} в {habit.place}"
 
-            send_telegram_message(chat_id=tg_id, message=message)
+            send_telegram_message_task(chat_id=tg_id, message=message)
 
         except Exception as e:
             print(f"Ошибка отправки Telegram: {e}")
 
-        if not habit.pleasant_habit:
-            delay_seconds = habit.duration // 2
-            message = f"До окончания действия привычки '{habit.action}' осталось {delay_seconds} секунд!"
-            # .apply_async - делает отложенное напоминание по времени(delay отправляет сразу, но в обход других задач)
-            send_telegram_reminder.apply_async(
-                args=[tg_id, message],
-                countdown=delay_seconds
-            )
-            # Особая отложенная задача для завершения привычки
-            check_status.apply_async(
-                args=[habit.id],
-                countdown=habit.duration
-            )
-
     def update(self, request, *args, **kwargs):
-        """Метод смены статуса привычки с оповещением"""
+        """Обработка завершения привычки"""
         response = super().update(request, *args, **kwargs)
-
-        # Получаем обновлённый объект
         habit = self.get_object()
 
-        # Если статус стал "выполнена" — отправляем награду в Telegram
-        if habit.status == 'completed' and habit.owner.telegram_chat_id:
-            if habit.related_habit:
-                reward = habit.related_habit.action
-            else:
-                reward = habit.reward
+        if habit.status == 'completed':
+            # Обновляем время последнего выполнения
+            habit.last_completed_at = timezone.now()
+            habit.status = 'started'  # сброс для нового цикла
+            habit.save(update_fields=['last_completed_at', 'status'])
 
-            message = f"Привычка '{habit.action}' выполнена. Забирайте награду: {reward}"
-            try:
-                send_telegram_message(habit.owner.telegram_chat_id, message)
-            except Exception as e:
-                print(f"Ошибка отправки Telegram: {e}")
+            # Отправка награды
+            tg_id = habit.owner.telegram_chat_id
+            if tg_id:
+                try:
+                    reward = habit.related_habit.action if habit.related_habit else habit.reward
+                    message = f"Привычка '{habit.action}' выполнена! Награда: {reward or 'Отличная работа!'}"
+                    send_telegram_message_task(tg_id, message)
+                except Exception as e:
+                    print(f"Ошибка Telegram при завершении: {e}")
 
         return response
+
