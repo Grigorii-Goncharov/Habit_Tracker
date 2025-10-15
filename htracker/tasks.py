@@ -1,33 +1,57 @@
 from celery import shared_task
-
+from django.utils import timezone
 from htracker.models import Habit
 from users.services import send_telegram_message
 
 
-#Bind - создает экземпляр задачи(для работы с повторами)
 @shared_task(bind=True, max_retries=3)
-#self -обязателен, если используешь bind(без него не работает self.retry)
-def send_telegram_reminder(self, chat_id, message):
-    """Отправление напоминаний в телеграмм"""
-
+def send_telegram_message_task(self, chat_id, message):
+    """Надёжная отправка с повторами"""
     try:
         send_telegram_message(chat_id, message)
     except Exception as e:
         print(f"Ошибка отправки Telegram: {e}")
-        raise self.retry(exception=e, countdown=60)  # повтор через 60 сек
+        raise self.retry(exc=e, countdown=60)
 
 
 @shared_task
-def check_status(habit_id):
-    """Функция смены статуса на /провалено/ """
+def send_reminder(habit_id):
+    """Напоминание по периодичности"""
     try:
         habit = Habit.objects.get(id=habit_id)
-        if habit.status == "started":
-            habit.status = "failed"
-            habit.save()
-            # Отправить уведомление
-            if habit.owner.telegram_chat_id:
-                message = f"Время на выполнение привычки '{habit.action}' истекло. Привычка помечена как проваленная."
-                send_telegram_message(habit.owner.telegram_chat_id, message)
+        if habit.owner.telegram_chat_id:
+            message = f"Напоминание: пора выполнить привычку '{habit.action}'!"
+            send_telegram_message_task.delay(habit.owner.telegram_chat_id, message)
     except Habit.DoesNotExist:
-        pass  # Привычка удалена — игнорируем
+        pass
+
+
+@shared_task
+def send_failure(habit_id):
+    """Провал из-за отсутствия выполнения 7 дней"""
+    try:
+        habit = Habit.objects.get(id=habit_id)
+        if habit.owner.telegram_chat_id:
+            message = f"Привычка '{habit.action}' провалена: не выполнена 7 дней."
+            send_telegram_message_task.delay(habit.owner.telegram_chat_id, message)
+        habit.status = 'failed'
+        habit.save(update_fields=['status'])
+    except Habit.DoesNotExist:
+        pass
+
+
+@shared_task
+def check_all_habits():
+    """Основная фоновая проверка (запускать через Celery Beat)"""
+    now = timezone.now()
+    for habit in Habit.objects.filter(status='started'):
+        last_time = habit.last_completed_at or habit.created_at
+        days_passed = (now - last_time).days
+
+        # Напоминание по периодичности
+        if days_passed >= habit.periodicity:
+            send_reminder.delay(habit.id)
+
+        # Провал через 7 дней
+        if days_passed >= 7:
+            send_failure.delay(habit.id)
