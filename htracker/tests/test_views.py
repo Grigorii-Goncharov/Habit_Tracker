@@ -7,10 +7,8 @@ if not settings.configured:
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
     django.setup()
 
-from datetime import time
 from unittest.mock import patch
 
-from django.urls import reverse
 from rest_framework.test import APITestCase
 
 from htracker.models import Habit
@@ -35,7 +33,6 @@ class HabitViewSetTests(APITestCase):
             "periodicity": 1,
             "duration": 60,
         }
-        url = reverse("htracker:htracker-list")
         response = self.client.post("/htracker/", data, format="json")
 
         self.assertEqual(response.status_code, 201)
@@ -78,7 +75,6 @@ class HabitViewSetTests(APITestCase):
             "duration": 60,
         }
 
-        url = reverse("htracker:htracker-list")
         response = self.client.post("/htracker/", data, format="json")
 
         self.assertEqual(response.status_code, 201)

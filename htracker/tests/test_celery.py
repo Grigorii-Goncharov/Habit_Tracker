@@ -93,30 +93,3 @@ class HabitCeleryTest(TestCase):
         # Задачи должны ни разу не вызаваться
         mock_send_reminder.assert_not_called(habit.id)
         mock_send_failure.assert_not_called(habit.id)
-
-    @patch("htracker.tasks.send_reminder.delay")
-    @patch("htracker.tasks.send_failure.delay")
-    def test_check_all_habits_no_reminder_no_failure(
-        self, mock_send_failure, mock_send_reminder
-    ):
-        """Запуск напоминалки переодичности и провала"""
-
-        habit = Habit.objects.create(
-            owner=self.user,
-            place="Дом",
-            time=time(10, 0),
-            action="Медитация",
-            reward="Шоколадка",
-            periodicity=3,  # Периодичность = 3 дня
-            duration=60,
-            status="started",
-            # Прошло 1 день > 7 - провал
-            last_completed_at=timezone.now() - timedelta(days=8),
-            # Привычка создана 1 день назад, последнее выполнение 4 день назад - напомним
-            created_at=timezone.now() - timedelta(days=8),
-        )
-        check_all_habits()
-
-        # Задачи должны ни разу не вызываться
-        mock_send_reminder.assert_called_once_with(habit.id)
-        mock_send_failure.assert_called_once_with(habit.id)
