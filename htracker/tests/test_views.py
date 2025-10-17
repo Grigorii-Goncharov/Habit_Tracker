@@ -84,4 +84,3 @@ class HabitViewSetTests(APITestCase):
 
         self.assertEqual(response.status_code, 201)
         self.assertTrue(Habit.objects.filter(action='Прогулка').exists())
-

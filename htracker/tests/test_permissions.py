@@ -136,3 +136,4 @@ class HabitPermissionsTest(TestCase):
             reverse('htracker:htracker-detail', kwargs={'pk': self.habit.id})
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+

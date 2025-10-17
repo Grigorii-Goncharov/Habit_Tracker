@@ -6,7 +6,6 @@ if not settings.configured:
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
     django.setup()
 
-
 from django.test import TestCase
 from datetime import time
 from htracker.models import Habit
