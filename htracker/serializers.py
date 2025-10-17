@@ -7,6 +7,7 @@ class HabitSerializer(serializers.ModelSerializer):
     class Meta:
         model = Habit
         fields = ('owner',
+                  'id',
                   'place',
                   'time',
                   'action',
@@ -27,5 +28,6 @@ class HabitSerializer(serializers.ModelSerializer):
             temp = Habit(owner=owner, **data)
             temp.clean()
         return data
+
 
 
