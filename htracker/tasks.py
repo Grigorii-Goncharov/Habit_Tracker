@@ -1,5 +1,6 @@
 from celery import shared_task
 from django.utils import timezone
+
 from htracker.models import Habit
 from users.services import send_telegram_message
 
@@ -34,8 +35,8 @@ def send_failure(habit_id):
         if habit.owner.telegram_chat_id:
             message = f"Привычка '{habit.action}' провалена: не выполнена 7 дней."
             send_telegram_message_task.delay(habit.owner.telegram_chat_id, message)
-        habit.status = 'failed'
-        habit.save(update_fields=['status'])
+        habit.status = "failed"
+        habit.save(update_fields=["status"])
     except Habit.DoesNotExist:
         pass
 
@@ -44,7 +45,7 @@ def send_failure(habit_id):
 def check_all_habits():
     """Основная фоновая проверка (запускать через Celery Beat)"""
     now = timezone.now()
-    for habit in Habit.objects.filter(status='started'):
+    for habit in Habit.objects.filter(status="started"):
         last_time = habit.last_completed_at or habit.created_at
         days_passed = (now - last_time).days
 
@@ -55,4 +56,3 @@ def check_all_habits():
         # Проваленная задача через 7 дней
         if days_passed >= 7:
             send_failure.delay(habit.id)
-

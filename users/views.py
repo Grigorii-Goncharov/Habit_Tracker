@@ -1,17 +1,16 @@
-from rest_framework.generics import (
-    CreateAPIView,
-    ListAPIView,
-    RetrieveUpdateDestroyAPIView,
-)
-from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
+from rest_framework.generics import (CreateAPIView, ListAPIView,
+                                     RetrieveUpdateDestroyAPIView)
+from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
+
 from users.models import User
-from users.serializers import UserRegisterSerializer, UserProfileSerializer
 from users.permissions import IsOwnerOrAdminForProfile
+from users.serializers import UserProfileSerializer, UserRegisterSerializer
 from users.services import send_telegram_message
 
 
 class UserCreateAPIView(CreateAPIView):
     """Регистрация пользователя"""
+
     serializer_class = UserRegisterSerializer
     queryset = User.objects.all()
     permission_classes = [AllowAny]
@@ -22,7 +21,7 @@ class UserCreateAPIView(CreateAPIView):
             try:
                 send_telegram_message(
                     chat_id=user.telegram_chat_id,
-                    message=" Добро пожаловать! Вы успешно зарегистрировались в трекере привычек."
+                    message=" Добро пожаловать! Вы успешно зарегистрировались в трекере привычек.",
                 )
             except Exception as e:
                 print(f"Ошибка отправки Telegram: {e}")
@@ -30,6 +29,7 @@ class UserCreateAPIView(CreateAPIView):
 
 class UserListAPIView(ListAPIView):
     """Список всех пользователей — только для админов"""
+
     serializer_class = UserProfileSerializer
     queryset = User.objects.all()
     permission_classes = [IsAdminUser]
@@ -37,6 +37,7 @@ class UserListAPIView(ListAPIView):
 
 class UserProfileAPIView(RetrieveUpdateDestroyAPIView):
     """Просмотр, редактирование и удаление своего профиля"""
+
     serializer_class = UserProfileSerializer
     permission_classes = [IsAuthenticated, IsOwnerOrAdminForProfile]
 

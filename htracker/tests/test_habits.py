@@ -1,56 +1,59 @@
 import os
+
 import django
 from django.conf import settings
 
 if not settings.configured:
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
     django.setup()
 
-from django.test import TestCase
 from datetime import time
+
+from django.core.exceptions import ValidationError
+from django.test import TestCase
+
 from htracker.models import Habit
 from users.models import User
-from django.core.exceptions import ValidationError
 
 
 class HabitModelTest(TestCase):
     """Тест создания данных из моделей"""
+
     def setUp(self):
         """Предустановка модели привычки"""
         self.user = User.objects.create_user(
-            email='test@example.com',
-            password='testpass123'
+            email="test@example.com", password="testpass123"
         )
         self.pleasant_habit = Habit.objects.create(
             owner=self.user,
-            place='Дом',
+            place="Дом",
             time=time(10, 0),
-            action='Пить воду',
-            pleasant_habit=True
+            action="Пить воду",
+            pleasant_habit=True,
         )
 
     def test_create_habit(self):
         """Тест создания полезной привычки(по умолчанию False)"""
         habit = Habit.objects.create(
             owner=self.user,
-            place='Парк',
+            place="Парк",
             time=time(12, 0),
-            action='Прогулка',
-            reward='Шоколадка',
+            action="Прогулка",
+            reward="Шоколадка",
             periodicity=1,
-            duration=60
+            duration=60,
         )
-        self.assertEqual(str(habit), 'Прогулка в Парк в 12:00:00')
+        self.assertEqual(str(habit), "Прогулка в Парк в 12:00:00")
         self.assertEqual(habit.owner, self.user)
 
     def test_duration_validation(self):
         """Тест нарушения длительности(более 2-ух минут)"""
         habit = Habit(
             owner=self.user,
-            place='Дом',
+            place="Дом",
             time=time(10, 0),
-            action='Пить воду',
-            duration=150
+            action="Пить воду",
+            duration=150,
         )
         with self.assertRaises(ValidationError):
             habit.full_clean()
@@ -59,10 +62,10 @@ class HabitModelTest(TestCase):
         """Тест нарушения переодичности(более 7 дней)"""
         habit = Habit(
             owner=self.user,
-            place='Дом',
+            place="Дом",
             time=time(10, 0),
-            action='Пить воду',
-            periodicity=10
+            action="Пить воду",
+            periodicity=10,
         )
         with self.assertRaises(ValidationError):
             habit.full_clean()
@@ -71,11 +74,11 @@ class HabitModelTest(TestCase):
         """Тест на награду у приятной привычки(запрет)"""
         habit = Habit(
             owner=self.user,
-            place='Дом',
+            place="Дом",
             time=time(10, 0),
-            action='Пить воду',
+            action="Пить воду",
             pleasant_habit=True,
-            reward='Шоколадка'
+            reward="Шоколадка",
         )
         with self.assertRaises(ValidationError):
             habit.full_clean()
@@ -84,9 +87,9 @@ class HabitModelTest(TestCase):
         """Тест на отсутствие любой награды у полезной привычки"""
         habit = Habit(
             owner=self.user,
-            place='Дом',
+            place="Дом",
             time=time(10, 0),
-            action='Убрать комнату',
+            action="Убрать комнату",
             pleasant_habit=False,
         )
         with self.assertRaises(ValidationError):
@@ -96,20 +99,20 @@ class HabitModelTest(TestCase):
         """Тест на применение награды и приятной привычки(запрет)"""
         test_habit = Habit.objects.create(
             owner=self.user,
-            place='Дом',
+            place="Дом",
             time=time(10, 0),
-            action='Шоколадка',
+            action="Шоколадка",
             pleasant_habit=True,
         )
 
         habit = Habit(
             owner=self.user,
-            place='Дом',
+            place="Дом",
             time=time(10, 0),
-            action='Убрать комнату',
+            action="Убрать комнату",
             pleasant_habit=False,
             related_habit=test_habit,
-            reward='Шоколадка',
+            reward="Шоколадка",
         )
         with self.assertRaises(ValidationError):
             habit.full_clean()
@@ -118,18 +121,18 @@ class HabitModelTest(TestCase):
         """Проверка связи приятной привычки у полезной"""
         not_pleasant_habit = Habit.objects.create(
             owner=self.user,
-            place='Дом',
+            place="Дом",
             time=time(10, 0),
-            action='Бег',
-            reward='Шоколадка',
-            pleasant_habit=False
+            action="Бег",
+            reward="Шоколадка",
+            pleasant_habit=False,
         )
 
         habit = Habit(
             owner=self.user,
-            place='Дом',
+            place="Дом",
             time=time(10, 0),
-            action='Пить воду',
+            action="Пить воду",
             related_habit=not_pleasant_habit,
             pleasant_habit=True,
         )
@@ -140,18 +143,18 @@ class HabitModelTest(TestCase):
         """Тест запрет связки двух приятных привычек"""
         not_pleasant_habit = Habit.objects.create(
             owner=self.user,
-            place='Дом',
+            place="Дом",
             time=time(10, 0),
-            action='Бег',
-            reward='Шоколадка',
-            pleasant_habit=True
+            action="Бег",
+            reward="Шоколадка",
+            pleasant_habit=True,
         )
 
         habit = Habit(
             owner=self.user,
-            place='Дом',
+            place="Дом",
             time=time(10, 0),
-            action='Пить воду',
+            action="Пить воду",
             related_habit=not_pleasant_habit,
             pleasant_habit=True,
         )
@@ -162,17 +165,17 @@ class HabitModelTest(TestCase):
         """Тест запрет связки двух полезных привычек"""
         not_pleasant_habit = Habit.objects.create(
             owner=self.user,
-            place='Дом',
+            place="Дом",
             time=time(10, 0),
-            action='Бег',
-            reward='Шоколадка',
+            action="Бег",
+            reward="Шоколадка",
         )
 
         habit = Habit(
             owner=self.user,
-            place='Дом',
+            place="Дом",
             time=time(10, 0),
-            action='Пить воду',
+            action="Пить воду",
             related_habit=not_pleasant_habit,
         )
         with self.assertRaises(ValidationError):

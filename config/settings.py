@@ -1,11 +1,10 @@
+import os
 import sys
 from datetime import timedelta
 from pathlib import Path
-import os
 
 from celery.schedules import crontab
 from dotenv import load_dotenv
-
 
 load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -177,24 +176,24 @@ if "test" in sys.argv:
 
 
 # Настройки Celery
-if 'test' in sys.argv:
+if "test" in sys.argv:
     # Настройки для тестов
     CELERY_TASK_ALWAYS_EAGER = True
     CELERY_TASK_EAGER_PROPAGATES = True
     # Используем memory backend вместо Redis
-    CELERY_RESULT_BACKEND = 'cache'
-    CELERY_CACHE_BACKEND = 'memory'
+    CELERY_RESULT_BACKEND = "cache"
+    CELERY_CACHE_BACKEND = "memory"
 else:
     # Реальные настройки
-    CELERY_BROKER_URL = 'redis://localhost:6379/0'
-    CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+    CELERY_BROKER_URL = "redis://localhost:6379/0"
+    CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
 
 
-#Используем eventlet на Windows
+# Используем eventlet на Windows
 CELERY_WORKER_POOL = "eventlet"
 CELERY_WORKER_POOL_RESTARTS = True
 
-#Опционально: сериализация
+# Опционально: сериализация
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
@@ -204,9 +203,9 @@ CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
 # Настройки Celery Beat (планировщик)
 CELERY_BEAT_SCHEDULE = {
-    'check-habits-daily': {
-        'task': 'tracker.tasks.check_all_habits',
-        'schedule': crontab(minute=0, hour='*/6'),
+    "check-habits-daily": {
+        "task": "tracker.tasks.check_all_habits",
+        "schedule": crontab(minute=0, hour="*/6"),
     },
 }
 

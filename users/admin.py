@@ -7,4 +7,3 @@ from users.models import User
 class UserAdmin(admin.ModelAdmin):
     list_display = ("username", "email", "phone", "telegram_chat_id")
     search_fields = ("email", "phone")
-

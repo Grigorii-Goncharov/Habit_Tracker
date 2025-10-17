@@ -3,10 +3,11 @@ from rest_framework import permissions
 
 class IsOwnerOrReadOnlyForPublic(permissions.BasePermission):
     """Переопределение прав между админом и юзером"""
+
     # Перредаем ссылку класса, запрос, вьюсет и конкретный объект к которому обращаемся
     def has_object_permission(self, request, view, obj):
         # GET, HEAD, OPTIONS - безопасные методы
-        SAFE_METHODS = ('GET', 'HEAD', 'OPTIONS')
+        SAFE_METHODS = ("GET", "HEAD", "OPTIONS")
 
         # 1. Любой может ЧИТАТЬ публичные привычки
         if request.method in SAFE_METHODS and obj.is_public:

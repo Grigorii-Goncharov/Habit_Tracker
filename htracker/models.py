@@ -1,67 +1,59 @@
 from django.core.exceptions import ValidationError
 from django.db import models
+
 from users.models import User
 
 
 class Habit(models.Model):
     """Модель привычки"""
-    STARTED = 'started'
-    COMPLETED = 'completed'
-    FAILED = 'failed'
 
+    STARTED = "started"
+    COMPLETED = "completed"
+    FAILED = "failed"
 
     STATUS_CHOICES = [
-        (STARTED, 'запущена'),
-        (COMPLETED, 'выполнена'),
-        (FAILED, 'провалена'),
+        (STARTED, "запущена"),
+        (COMPLETED, "выполнена"),
+        (FAILED, "провалена"),
     ]
 
     owner = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='habits',
-        verbose_name="Владелец"
+        User, on_delete=models.CASCADE, related_name="habits", verbose_name="Владелец"
     )
     place = models.CharField(max_length=100, verbose_name="Место")
     time = models.TimeField(verbose_name="Время")
     action = models.CharField(max_length=150, verbose_name="Действие")
 
-    pleasant_habit = models.BooleanField(default=False, verbose_name="Приятная привычка")
+    pleasant_habit = models.BooleanField(
+        default=False, verbose_name="Приятная привычка"
+    )
 
     related_habit = models.ForeignKey(
-        'self',
+        "self",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        limit_choices_to={'pleasant_habit': True},
-        verbose_name="Связанная приятная привычка"
+        limit_choices_to={"pleasant_habit": True},
+        verbose_name="Связанная приятная привычка",
     )
 
     periodicity = models.PositiveSmallIntegerField(
-        default=1,
-        verbose_name="Периодичность (в днях)"
+        default=1, verbose_name="Периодичность (в днях)"
     )
 
-    reward = models.CharField(
-        max_length=150,
-        blank=True,
-        verbose_name="Вознаграждение"
-    )
+    reward = models.CharField(max_length=150, blank=True, verbose_name="Вознаграждение")
 
     duration = models.PositiveSmallIntegerField(
-        default=120,
-        verbose_name="Время на выполнение (в секундах)"
+        default=120, verbose_name="Время на выполнение (в секундах)"
     )
 
     is_public = models.BooleanField(default=False, verbose_name="Публичная")
 
-    status  = models.CharField(max_length=15, choices=STATUS_CHOICES, default=STARTED)
+    status = models.CharField(max_length=15, choices=STATUS_CHOICES, default=STARTED)
 
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
     last_completed_at = models.DateTimeField(
-        null=True,
-        blank=True,
-        verbose_name="Последнее выполнение"
+        null=True, blank=True, verbose_name="Последнее выполнение"
     )
 
     def clean(self):
@@ -86,9 +78,7 @@ class Habit(models.Model):
                     "Полезная привычка должна иметь вознаграждение или связанную приятную привычку."
                 )
             if self.related_habit and not self.related_habit.pleasant_habit:
-                raise ValidationError(
-                    "Связанная привычка должна быть приятной."
-                )
+                raise ValidationError("Связанная привычка должна быть приятной.")
 
     def __str__(self):
         return f"{self.action} в {self.place} в {self.time}"
