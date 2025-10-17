@@ -1,3 +1,14 @@
+import os
+
+import django
+from django.conf import settings
+
+if not settings.configured:
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
+    django.setup()
+
+
+
 from datetime import time, timedelta
 from unittest.mock import patch
 
@@ -83,13 +94,13 @@ class HabitCeleryTest(TestCase):
             periodicity=3,  # Периодичность = 3 дня - напоминание не нужно
             duration=60,
             status="started",
-            # Прошло 1 день < 7 - провала не будет
+            # Прошло 1 день < 7 - проваленной задачи не будет
             last_completed_at=timezone.now() - timedelta(days=1),
             # Привычка создана 1 день назад, последнее выполнение 1 день назад
             created_at=timezone.now() - timedelta(days=1),
         )
         check_all_habits()
 
-        # Задачи должны ни разу не вызаваться
-        mock_send_reminder.assert_not_called(habit.id)
-        mock_send_failure.assert_not_called(habit.id)
+        # Задачи должны ни разу не вызываться
+        mock_send_reminder.assert_not_called()
+        mock_send_failure.assert_not_called()
