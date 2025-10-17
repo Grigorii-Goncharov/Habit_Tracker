@@ -28,7 +28,7 @@ def send_reminder(habit_id):
 
 @shared_task
 def send_failure(habit_id):
-    """Провал из-за отсутствия выполнения 7 дней"""
+    """Проваленная задача из-за отсутствия выполнения 7 дней"""
     try:
         habit = Habit.objects.get(id=habit_id)
         if habit.owner.telegram_chat_id:
@@ -52,6 +52,7 @@ def check_all_habits():
         if days_passed >= habit.periodicity:
             send_reminder.delay(habit.id)
 
-        # Провал через 7 дней
+        # Проваленная задача через 7 дней
         if days_passed >= 7:
             send_failure.delay(habit.id)
+
