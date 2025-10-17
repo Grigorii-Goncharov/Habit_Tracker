@@ -177,8 +177,18 @@ if "test" in sys.argv:
 
 
 # Настройки Celery
-CELERY_BROKER_URL = "redis://localhost:6379/0"
-CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
+if 'test' in sys.argv:
+    # Настройки для тестов
+    CELERY_TASK_ALWAYS_EAGER = True
+    CELERY_TASK_EAGER_PROPAGATES = True
+    # Используем memory backend вместо Redis
+    CELERY_RESULT_BACKEND = 'cache'
+    CELERY_CACHE_BACKEND = 'memory'
+else:
+    # Реальные настройки
+    CELERY_BROKER_URL = 'redis://localhost:6379/0'
+    CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+
 
 #Используем eventlet на Windows
 CELERY_WORKER_POOL = "eventlet"
