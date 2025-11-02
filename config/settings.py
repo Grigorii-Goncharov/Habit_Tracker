@@ -1,11 +1,10 @@
+import os
 import sys
 from datetime import timedelta
 from pathlib import Path
-import os
 
 from celery.schedules import crontab
 from dotenv import load_dotenv
-
 
 load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -123,7 +122,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Europe/Moscow"
 
 USE_I18N = True
 
@@ -141,7 +140,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
- AUTH_USER_MODEL = "users.User"  # ← указываем, что User — из приложения users
+AUTH_USER_MODEL = "users.User"  # ← указываем, что User — из приложения users
 
 # LOGIN_REDIRECT_URL = 'users:profile'
 # LOGOUT_REDIRECT_URL = 'catalog:home'
@@ -177,8 +176,18 @@ if "test" in sys.argv:
 
 
 # Настройки Celery
-CELERY_BROKER_URL = "redis://localhost:6379/0"
-CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
+if "test" in sys.argv:
+    # Настройки для тестов
+    CELERY_TASK_ALWAYS_EAGER = True
+    CELERY_TASK_EAGER_PROPAGATES = True
+    # Используем memory backend вместо Redis
+    CELERY_RESULT_BACKEND = "cache"
+    CELERY_CACHE_BACKEND = "memory"
+else:
+    # Реальные настройки
+    CELERY_BROKER_URL = "redis://localhost:6379/0"
+    CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
+
 
 # Используем eventlet на Windows
 CELERY_WORKER_POOL = "eventlet"
@@ -188,14 +197,17 @@ CELERY_WORKER_POOL_RESTARTS = True
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
-CELERY_TIMEZONE = "TIME_ZONE"
+CELERY_TIMEZONE = "Europe/Moscow"
 
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
 # Настройки Celery Beat (планировщик)
 CELERY_BEAT_SCHEDULE = {
-    "deactivate-inactive-users-daily": {
-        "task": "educations.tasks.deactivate_inactive_users",
-        "schedule": crontab(hour=2, minute=0),  # каждый день в 02:00
+    "check-habits-daily": {
+        "task": "tracker.tasks.check_all_habits",
+        "schedule": crontab(minute=0, hour="*/6"),
     },
 }
+
+TELEGRAM_URL = "https://api.telegram.org/bot"
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
