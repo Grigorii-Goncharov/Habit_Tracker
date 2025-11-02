@@ -16,7 +16,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 
 DEBUG = True if os.getenv("DEBUG") == "True" else False
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ["ALLOWED_HOSTS", "*"]
 
 
 INSTALLED_APPS = [
@@ -77,7 +77,7 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -98,7 +98,7 @@ DATABASES = {
         "NAME": os.getenv("DB_NAME"),
         "USER": os.getenv("DB_USER"),
         "PASSWORD": os.getenv("DB_PASSWORD"),
-        "HOST": os.getenv("DB_HOST"),
+        "HOST": os.getenv("DB_HOST", "localhost"),
         "PORT": os.getenv("DB_PORT"),
     }
 }
@@ -120,7 +120,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "ru"
 
 TIME_ZONE = "Europe/Moscow"
 
@@ -131,7 +131,7 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 
-STATICFILES_DIRS = (BASE_DIR / "static",)
+STATICFILES_DIRS = [BASE_DIR / "static"]
 
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
@@ -164,15 +164,61 @@ CACHES = {
     }
 }
 
-
 # для теста
-if "test" in sys.argv:
-    ALLOWED_HOSTS = ["testserver", "localhost", "127.0.0.1"]
+# Настройки для тестирования, через SQ-lite включая CI/CD
+# if "test" in sys.argv:
+#     ALLOWED_HOSTS = ["testserver", "localhost", "127.0.0.1"]
+#
+#     # Дополнительные настройки для тестов
+#     PASSWORD_HASHERS = [
+#         "django.contrib.auth.hashers.MD5PasswordHasher",  # Быстрее для тестов
+#     ]
+#
+#     # 🗃 База данных - для тестов стоковая
+#     DATABASES = {
+#         "default": {
+#             "ENGINE": "django.db.backends.sqlite3",
+#             "NAME": BASE_DIR / "db.sqlite3",
+#         }
+#     }
+#
+#     LANGUAGE_CODE = "ru-ru"
+#     TIME_ZONE = "UTC"
+#     USE_I18N = True
+#     USE_TZ = True
+#
+#     # 📦 Статика
+#     STATIC_URL = "/static/"
+#     STATICFILES_DIRS = []
+#
+#     # 📧 Email
+#     EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
+#
+#     # ПРОИЗВОЛЬНЫЙ КЛЮЧ ДЛЯ ТЕСТОВ
+#     SECRET_KEY = "ci-test-secret-key-unsafe-but-ok"
+#     DEBUG = True
+#     ROOT_URLCONF = "config.urls"
+#
+#     # 🔑 Указываем, что кастомная модель User — основная
+#     AUTH_USER_MODEL = "users.User"
+#
+#     # 🖼 TEMPLATES — обязательно для админки
+#     TEMPLATES = [
+#         {
+#             "BACKEND": "django.template.backends.django.DjangoTemplates",
+#             "DIRS": [],
+#             "APP_DIRS": True,
+#             "OPTIONS": {
+#                 "context_processors": [
+#                     "django.template.context_processors.debug",
+#                     "django.template.context_processors.request",
+#                     "django.contrib.auth.context_processors.auth",
+#                     "django.contrib.messages.context_processors.messages",
+#                 ],
+#             },
+#         },
+#     ]
 
-    # Дополнительные настройки для тестов
-    PASSWORD_HASHERS = [
-        "django.contrib.auth.hashers.MD5PasswordHasher",  # Быстрее для тестов
-    ]
 
 
 # Настройки Celery
