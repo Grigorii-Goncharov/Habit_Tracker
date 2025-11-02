@@ -184,7 +184,7 @@ class UserPermissionsTest(TestCase):
         response = self.client.get(reverse("users:user-list"))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        user1_id = self.user1.id   # noqa: F841 - игнорирование строки для flake8
+        user1_id = self.user1.id  # noqa: F841 - игнорирование строки для flake8
         permission = IsOwnerOrAdminForProfile()
 
         request = HttpRequest()
