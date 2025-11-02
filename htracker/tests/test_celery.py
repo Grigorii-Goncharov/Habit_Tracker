@@ -88,7 +88,7 @@ class HabitCeleryTest(TestCase):
     ):
         """Тест: привычка не требует напоминания и не проваливается"""
 
-        Habit.objects.create(
+        habit = Habit.objects.create(   # noqa: F841 - игнорирование строки для flake8
             owner=self.user,
             place="Дом",
             time=time(10, 0),
