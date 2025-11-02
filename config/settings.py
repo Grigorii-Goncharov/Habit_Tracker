@@ -220,7 +220,6 @@ CACHES = {
 #     ]
 
 
-
 # Настройки Celery
 if "test" in sys.argv:
     # Настройки для тестов
