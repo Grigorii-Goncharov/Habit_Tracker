@@ -8,7 +8,6 @@ if not settings.configured:
     django.setup()
 
 
-
 from datetime import time, timedelta
 from unittest.mock import patch
 
@@ -16,8 +15,12 @@ from django.test import TestCase, override_settings
 from django.utils import timezone
 
 from htracker.models import Habit
-from htracker.tasks import (check_all_habits, send_failure, send_reminder,
-                            send_telegram_message_task)
+from htracker.tasks import (
+    check_all_habits,
+    send_failure,
+    send_reminder,
+    send_telegram_message_task,
+)
 from users.models import User
 
 
@@ -85,7 +88,7 @@ class HabitCeleryTest(TestCase):
     ):
         """Тест: привычка не требует напоминания и не проваливается"""
 
-        habit = Habit.objects.create(
+        habit = Habit.objects.create(  # noqa: F841 - игнорирование строки для flake8
             owner=self.user,
             place="Дом",
             time=time(10, 0),
